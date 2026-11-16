@@ -18,7 +18,7 @@ $msg = "";
 // Generate a unique tracking number
 $tnumbs = "12345678900987654321";
 $tnumbs = str_shuffle($tnumbs);
-$track_prefix = "WC"; // Using WC for Universal Union Logistics
+$track_prefix = "UUL"; // Universal Union Logistics prefix (first 3 letters)
 $tnumbs = substr($tnumbs, 0, 8);
 $tnumbs = $track_prefix . date('y') . $tnumbs;
 
