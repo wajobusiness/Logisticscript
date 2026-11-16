@@ -190,7 +190,7 @@ if (isset($_GET['num']) && $_GET['num'] != "") {
                     </div>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">
                         24-26 Minories, London EC3N 1BQ, United Kingdom<br>
-                        Tel/WhatsApp: +44 7594 694996 | Email: <?php echo htmlspecialchars($settings_data['email_address'] ?? 'contact@universalunionlogistics.com'); ?><br>
+                        Tel/WhatsApp: +44 7594 694996 | Telegram: @universal_union545 | Email: <?php echo htmlspecialchars($settings_data['email_address'] ?? 'contact@universalunionlogistics.com'); ?><br>
                         Web: <?php echo htmlspecialchars($settings_data['site_url'] ?? 'https://universalunionlogistics.com'); ?>
                     </p>
                 </div>

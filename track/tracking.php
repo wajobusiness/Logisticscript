@@ -524,6 +524,9 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
     <a href="https://wa.me/447594694996" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
         <i class="fa-brands fa-whatsapp" style="font-size: 1.5rem;"></i>
     </a>
+    <a href="https://t.me/universal_union545" target="_blank" class="telegram-float" aria-label="Chat on Telegram">
+        <i class="fa-brands fa-telegram" style="font-size: 1.5rem;"></i>
+    </a>
     <script src="../assets/js/sky-logistics.js"></script>
 </body>
 </html>
