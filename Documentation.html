@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Guide - Universal Union Logistics Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-dark-primary: #111827;
+            --bg-dark-secondary: #1F2937;
+            --accent-primary: #0284c7;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+        .step-number {
+            background-color: var(--accent-primary);
+            color: white;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        .code-block {
+            background-color: #0d1117;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #30363d;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-gray-800 shadow-md py-8">
+        <div class="container mx-auto px-6 text-center">
+            <div class="inline-block bg-white p-3 rounded-2xl shadow-lg mb-4">
+                <img src="assets/img/logo.png" alt="Universal Union Logistics" class="h-14 w-auto mx-auto object-contain">
+            </div>
+            <h1 class="text-4xl font-extrabold text-white">Universal Union Logistics Script Installation</h1>
+            <p class="mt-2 text-lg text-text-secondary">A simple, step-by-step guide to get you up and running.</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Welcome Section -->
+            <div class="bg-gray-800 p-8 rounded-2xl shadow-lg mb-10 text-center">
+                <h2 class="text-3xl font-bold text-white mb-3">Welcome! 🎉</h2>
+                <p class="text-text-secondary">Thank you for choosing Universal Union Logistics! This guide will walk you through the installation process. It's designed to be super easy, especially for cPanel users. Don't worry, you can do this!</p>
+            </div>
+            
+            <!-- Requirements -->
+            <div class="mb-10">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i data-feather="check-square" class="mr-3 text-indigo-400"></i>Before You Start</h3>
+                <ul class="list-inside list-disc bg-gray-800 p-6 rounded-2xl shadow-lg text-text-secondary space-y-2">
+                    <li>A web hosting account (like Bluehost, Namecheap, etc.) with **cPanel** access.</li>
+                    <li>Your website domain name (e.g., `www.yourcargosite.com`).</li>
+                    <li>The script files you downloaded, in a `.zip` format.</li>
+                    <li>PHP version **7.4** or higher on your hosting. You can usually check or change this in your cPanel under "MultiPHP Manager" or "Select PHP Version".</li>
+                </ul>
+            </div>
+
+            <!-- Installation Steps -->
+            <div class="space-y-8">
+
+                <!-- Step 1: Upload Files -->
+                <div class="flex items-start">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Upload Your Files</h4>
+                        <p class="text-text-secondary mt-1">First, log in to your cPanel. Look for the **File Manager**. Navigate to the `public_html` directory (this is your main website folder). Click "Upload", select your script's `.zip` file, and upload it. Once uploaded, right-click the `.zip` file and choose "Extract".</p>
+                        <img src="https://placehold.co/800x200/1F2937/9CA3AF?text=cPanel+File+Manager" alt="cPanel File Manager" class="mt-4 rounded-lg shadow-md w-full">
+                    </div>
+                </div>
+
+                <!-- Step 2: Create Database -->
+                <div class="flex items-start">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Create a Database</h4>
+                        <p class="text-text-secondary mt-1">In cPanel, find **MySQL® Database Wizard**. Follow the steps:</p>
+                        <ol class="list-decimal list-inside text-text-secondary mt-2 space-y-1">
+                            <li>**Create a Database:** Give your database a name (e.g., `universal_union_db`).</li>
+                            <li>**Create a User:** Create a database user and a strong password. **Important: Save these details in a notepad!** You'll need them soon.</li>
+                            <li>**Add User to Database:** Assign the user to the database and give it **"All Privileges"**.</li>
+                        </ol>
+                         <img src="https://placehold.co/800x200/1F2937/9CA3AF?text=cPanel+MySQL+Database+Wizard" alt="cPanel Database Wizard" class="mt-4 rounded-lg shadow-md w-full">
+                    </div>
+                </div>
+                
+                 <!-- Step 3: Import SQL -->
+                <div class="flex items-start">
+                    <div class="step-number">3</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Import the SQL File</h4>
+                        <p class="text-text-secondary mt-1">Now, find **phpMyAdmin** in cPanel. On the left, click on the database you just created. Then, click the **"Import"** tab at the top. Choose the `database.sql` file from the script files on your computer and click "Go". This will set up all the necessary tables.</p>
+                         <img src="https://placehold.co/800x200/1F2937/9CA3AF?text=phpMyAdmin+Import+Screen" alt="phpMyAdmin Import" class="mt-4 rounded-lg shadow-md w-full">
+                    </div>
+                </div>
+
+                <!-- Step 4: Configure Database -->
+                <div class="flex items-start">
+                    <div class="step-number">4</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Connect to Your Database</h4>
+                        <p class="text-text-secondary mt-1">Go back to the **File Manager**. Find the file named `db.php`. Right-click it and choose "Edit". You need to replace the placeholder details with the database name, username, and password you saved in Step 2.</p>
+                        <div class="code-block mt-4">
+                            <span class="text-gray-500">&lt;?php</span><br>
+                            <span class="text-gray-400">$con = mysqli_connect(</span><br>
+                            <span class="text-yellow-400">  "localhost",</span><br>
+                            <span class="text-yellow-400">  "your_database_user", </span><span class="text-green-400">// ← Replace this</span><br>
+                            <span class="text-yellow-400">  "your_password",    </span><span class="text-green-400">// ← Replace this</span><br>
+                            <span class="text-yellow-400">  "your_database_name" </span><span class="text-green-400">// ← Replace this</span><br>
+                            <span class="text-gray-400">);</span><br>
+                            <span class="text-gray-500">?&gt;</span>
+                        </div>
+                    </div>
+                </div>
+                
+                 <!-- Step 5: Configure Email -->
+                <div class="flex items-start">
+                    <div class="step-number">5</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">Set Up Email Notifications (Optional)</h4>
+                        <p class="text-text-secondary mt-1">To send emails for shipment updates, you need to edit the `functions.php` file. Open it and find the `sendMail` function. You will need to add your own SMTP details from your email provider (like Gmail, SendGrid, or your hosting's email service).</p>
+                        <div class="code-block mt-4">
+                            <span class="text-pink-400">function</span> <span class="text-blue-400">sendMail</span>(<span class="text-orange-400">$to, $subject, $body</span>) {<br>
+                            <span class="text-gray-400">  // ... a lot of code here ...</span><br>
+                            <span class="text-gray-400">  $mail-&gt;Host       = </span><span class="text-yellow-400">'smtp.example.com'; </span><span class="text-green-400">// ← Your SMTP host</span><br>
+                            <span class="text-gray-400">  $mail-&gt;Username   = </span><span class="text-yellow-400">'user@example.com';   </span><span class="text-green-400">// ← Your SMTP username</span><br>
+                            <span class="text-gray-400">  $mail-&gt;Password   = </span><span class="text-yellow-400">'your_password';    </span><span class="text-green-400">// ← Your SMTP password</span><br>
+                            <span class="text-gray-400">  // ... more code ...</span><br>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: All Done! -->
+                <div class="flex items-start">
+                    <div class="step-number">6</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white">You're All Set!</h4>
+                        <p class="text-text-secondary mt-1">Congratulations! The installation is complete. You can now visit your website and access the admin panel by going to `www.yourcargosite.com/admin/login.php`.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Support Section -->
+            <div class="mt-16 bg-gradient-to-r from-sky-600 to-blue-700 p-8 rounded-2xl shadow-lg text-center">
+                <h3 class="text-3xl font-bold text-white mb-3">Need Help? Go Premium!</h3>
+                <p class="text-sky-100 mb-6">If you're stuck or just want a professional to handle the installation and setup for you, we offer a premium installation service.</p>
+                <a href="https://wa.me/447594694996" target="_blank" class="inline-block bg-white text-sky-600 font-bold py-3 px-8 rounded-lg shadow-md hover:bg-gray-200 transition-colors duration-300">
+                    <i data-feather="message-circle" class="inline-block -mt-1 mr-2"></i> Contact Us on WhatsApp
+                </a>
+                <p class="text-sm text-sky-100 mt-4">+447594694996</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-sm text-text-secondary">
+        <p>&copy; <?php echo date("Y"); ?> Universal Union Logistics. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
