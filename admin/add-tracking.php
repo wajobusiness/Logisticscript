@@ -53,21 +53,37 @@ if (isset($_POST['add'])) {
         $error = "Please fill in all required fields (Sender Name, Receiver Name, Description).";
     }
 
-    // Image Upload
+    // Image Upload (Max 5MB)
     $packageImage = '';
-    if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
-        $extensions = array("jpeg", "jpg", "png");
-        $location = "../uploads/";
-        $filename = $_FILES["image"]["name"];
-        $file_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        
-        if (in_array($file_ext, $extensions)) {
-            $packageImage = $tnumbs . '.' . $file_ext;
-            if (!move_uploaded_file($_FILES["image"]["tmp_name"], $location . $packageImage)) {
-                $error = "Failed to upload image.";
-            }
+    $maxFileSize = 5 * 1024 * 1024; // 5MB in bytes (5,242,880 bytes)
+
+    if (isset($_FILES["image"])) {
+        $fileError = $_FILES["image"]["error"];
+        $fileSize = $_FILES["image"]["size"] ?? 0;
+
+        if ($fileError === UPLOAD_ERR_INI_SIZE || $fileError === UPLOAD_ERR_FORM_SIZE || $fileSize > $maxFileSize) {
+            $error = "Package image exceeds the maximum allowed limit of 5MB. Please upload a smaller image (under 5MB).";
+        } elseif ($fileError === UPLOAD_ERR_NO_FILE) {
+            $error = "Package image is required. Please select an image file (Max 5MB).";
+        } elseif ($fileError !== UPLOAD_ERR_OK) {
+            $error = "Image upload failed with error code: " . $fileError . ". Please try another image.";
         } else {
-            $error = "Invalid file type. Please choose a JPEG, JPG, or PNG file.";
+            $extensions = array("jpeg", "jpg", "png", "webp");
+            $location = "../uploads/";
+            $filename = $_FILES["image"]["name"];
+            $file_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+            if (in_array($file_ext, $extensions)) {
+                if (!is_dir($location)) {
+                    mkdir($location, 0755, true);
+                }
+                $packageImage = $tnumbs . '.' . $file_ext;
+                if (!move_uploaded_file($_FILES["image"]["tmp_name"], $location . $packageImage)) {
+                    $error = "Failed to upload image. Please check upload folder permissions.";
+                }
+            } else {
+                $error = "Invalid file type. Supported formats are JPG, JPEG, PNG, and WEBP.";
+            }
         }
     } else {
         $error = "Package image is required.";
@@ -178,6 +194,7 @@ if (isset($_POST['add'])) {
         </header>
         <main class="flex-1 p-4 sm:p-6">
             <form action="add-tracking.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="MAX_FILE_SIZE" value="5242880">
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6">
                     <h3 class="text-lg font-semibold text-white">Tracking Number (Auto-Generated)</h3>
                     <input type="text" readonly value="<?php echo $tnumbs; ?>" class="w-full mt-2 p-3 bg-gray-900 text-sky-400 font-mono rounded-md border border-gray-700">
@@ -219,7 +236,26 @@ if (isset($_POST['add'])) {
                         <div class="border-t border-gray-700 my-4"></div>
 
                         <div><label class="text-sm text-gray-400">Package Description</label><input type="text" name="packagedescription" class="w-full mt-1 p-2 form-input rounded-md" required></div>
-                        <div><label class="text-sm text-gray-400">Package Image</label><input type="file" name="image" class="w-full mt-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700" required></div>
+                        <div class="bg-gray-900/60 p-4 rounded-xl border border-gray-700/80">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-sm font-semibold text-gray-200 flex items-center gap-1.5">
+                                    <i data-feather="image" class="w-4 h-4 text-sky-400"></i>
+                                    Package Image <span class="text-red-400">*</span>
+                                </label>
+                                <span class="text-xs px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-700/60 font-semibold font-mono">
+                                    Max 5 MB
+                                </span>
+                            </div>
+                            <input type="file" name="image" id="packageImageInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full mt-1 text-sm text-gray-300 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-500 cursor-pointer transition-all" required>
+                            <div class="mt-2 flex items-center justify-between text-xs text-gray-400">
+                                <span><strong class="text-sky-400">File Limit:</strong> Maximum 5 MB</span>
+                                <span><strong class="text-gray-300">Formats:</strong> JPG, JPEG, PNG, WEBP</span>
+                            </div>
+                            <div id="fileSizeAlert" class="hidden mt-2.5 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-xs text-red-200 flex items-start gap-2">
+                                <i data-feather="alert-triangle" class="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5"></i>
+                                <span id="fileSizeAlertText">File exceeds 5MB limit. Please upload a smaller image.</span>
+                            </div>
+                        </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="text-sm text-gray-400">Weight (e.g., 5kg)</label><input type="text" name="weight" class="w-full mt-1 p-2 form-input rounded-md"></div>
                             <div><label class="text-sm text-gray-400">Quantity</label><input type="number" name="quantity" value="1" class="w-full mt-1 p-2 form-input rounded-md"></div>
@@ -275,6 +311,29 @@ if (isset($_POST['add'])) {
         sidebar.classList.add('-translate-x-full');
         sidebarOverlay.style.display = 'none';
     });
+
+    // Live Package Image 5MB Limit Validation
+    const packageImageInput = document.getElementById('packageImageInput');
+    const fileSizeAlert = document.getElementById('fileSizeAlert');
+    const fileSizeAlertText = document.getElementById('fileSizeAlertText');
+
+    if (packageImageInput) {
+        packageImageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const maxBytes = 5 * 1024 * 1024; // 5 MB (5,242,880 bytes)
+                if (file.size > maxBytes) {
+                    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                    fileSizeAlertText.innerHTML = `<strong>File too large!</strong> Selected image is <strong>${sizeInMB} MB</strong>, which exceeds the <strong>5 MB</strong> maximum limit. Please upload an image under 5 MB.`;
+                    fileSizeAlert.classList.remove('hidden');
+                    this.value = ''; // Clear the invalid file selection
+                    if (window.feather) feather.replace();
+                } else {
+                    fileSizeAlert.classList.add('hidden');
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>
