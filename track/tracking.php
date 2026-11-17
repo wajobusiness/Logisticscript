@@ -7,27 +7,34 @@ $tracking_data = null;
 $tracking_history = [];
 $error_message = "";
 
-if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
-    $tracking_pr = isset($_POST['search_P']) ? trim($_POST['search_P']) : $_SESSION['search_P'];
+$tracking_pr = '';
+if (isset($_POST['search_P']) && trim($_POST['search_P']) !== '') {
+    $tracking_pr = trim($_POST['search_P']);
+} elseif (isset($_GET['tracking_id']) && trim($_GET['tracking_id']) !== '') {
+    $tracking_pr = trim($_GET['tracking_id']);
+} elseif (isset($_GET['num']) && trim($_GET['num']) !== '') {
+    $tracking_pr = trim($_GET['num']);
+} elseif (isset($_GET['search_P']) && trim($_GET['search_P']) !== '') {
+    $tracking_pr = trim($_GET['search_P']);
+} elseif (isset($_SESSION['search_P']) && trim($_SESSION['search_P']) !== '') {
+    $tracking_pr = trim($_SESSION['search_P']);
+}
 
-    if (empty($tracking_pr)) {
-        $error_message = "Please enter a valid tracking number.";
-    } else {
-        $safe_tracking_pr = mysqli_real_escape_string($con, $tracking_pr);
-        $sql = mysqli_query($con, "SELECT * FROM addtracking WHERE tracking_id = '$safe_tracking_pr' ");
-        if (mysqli_num_rows($sql) > 0) {
-            $tracking_data = mysqli_fetch_assoc($sql);
-            $_SESSION['search_P'] = $tracking_data['tracking_id'];
+if (!empty($tracking_pr)) {
+    $safe_tracking_pr = mysqli_real_escape_string($con, $tracking_pr);
+    $sql = mysqli_query($con, "SELECT * FROM addtracking WHERE tracking_id = '$safe_tracking_pr' ");
+    if ($sql && mysqli_num_rows($sql) > 0) {
+        $tracking_data = mysqli_fetch_assoc($sql);
+        $_SESSION['search_P'] = $tracking_data['tracking_id'];
 
-            // Fetch tracking history
-            $history_sql = mysqli_query($con, "SELECT * FROM track_update WHERE track_num = '$safe_tracking_pr' ORDER BY date DESC, time DESC");
-            while ($row = mysqli_fetch_assoc($history_sql)) {
-                $tracking_history[] = $row;
-            }
-        } else {
-            $error_message = "Tracking number '$tracking_pr' not found in our global database. Please check the number and try again.";
-            unset($_SESSION['search_P']);
+        // Fetch tracking history
+        $history_sql = mysqli_query($con, "SELECT * FROM track_update WHERE track_num = '$safe_tracking_pr' ORDER BY date DESC, time DESC");
+        while ($row = mysqli_fetch_assoc($history_sql)) {
+            $tracking_history[] = $row;
         }
+    } else {
+        $error_message = "Tracking number '$tracking_pr' not found in our global database. Please check the number and try again.";
+        unset($_SESSION['search_P']);
     }
 }
 ?>
@@ -146,6 +153,157 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
             background-color: var(--primary);
             border-color: #ffffff;
             box-shadow: 0 0 0 4px var(--primary);
+        }
+
+        /* Consignment Item & Cargo Showcase */
+        .consignment-item-card {
+            background-color: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .consignment-item-header {
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(to right, #f8fafc, #ffffff);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .consignment-item-body {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 2.25rem;
+            align-items: start;
+        }
+        .package-image-frame {
+            position: relative;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border-color);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+        }
+        .package-image-preview {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .package-image-preview:hover {
+            transform: scale(1.03);
+        }
+        .package-badge-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background-color: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .package-image-caption {
+            width: 100%;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .package-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+        .spec-box {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.15rem;
+            transition: var(--transition);
+        }
+        .spec-box:hover {
+            border-color: #bae6fd;
+            background-color: #f0f9ff;
+        }
+        .spec-label {
+            font-size: 0.75rem;
+            font-family: var(--font-heading);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .spec-value {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--secondary);
+            word-break: break-word;
+        }
+        .stats-grid-responsive {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .tracking-details-grid {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 991px) {
+            .consignment-item-body {
+                grid-template-columns: 1fr;
+                gap: 1.75rem;
+            }
+            .package-image-frame {
+                height: 300px;
+            }
+            .package-image-preview {
+                height: 300px;
+            }
+            .tracking-details-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid-responsive {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .package-specs-grid {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+            }
+            .stats-grid-responsive {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -312,7 +470,7 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
                     </div>
 
                     <!-- 4 Metric Cards -->
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem;">
+                    <div class="stats-grid-responsive">
                         <div class="stat-box">
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Assigned Carrier</div>
                             <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; color: var(--secondary);">
@@ -343,8 +501,127 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
                     </div>
                 </div>
 
+                <!-- Consignment Item & Cargo Details Card (Image & Complete Specifications) -->
+                <div class="consignment-item-card">
+                    <div class="consignment-item-header">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 38px; height: 38px; border-radius: 8px; background-color: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                <i class="fa-solid fa-boxes-packing"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin: 0;">
+                                    Consignment Item & Cargo Details
+                                </h3>
+                                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                                    Physical item snapshot, freight characteristics & dispatch manifest
+                                </p>
+                            </div>
+                        </div>
+                        <span class="kicker-badge" style="font-size: 0.75rem; padding: 0.25rem 0.85rem; margin-bottom: 0;">
+                            <i class="fa-solid fa-shield-halved" style="margin-right: 0.35rem;"></i> Verified Cargo Record
+                        </span>
+                    </div>
+
+                    <div class="consignment-item-body">
+                        <!-- Left: Item Photo Showcase -->
+                        <div class="package-image-frame">
+                            <?php if (!empty($tracking_data['image'])): ?>
+                                <div class="package-badge-tag">
+                                    <i class="fa-solid fa-camera"></i> Package Item Photo
+                                </div>
+                                <a href="../uploads/<?php echo htmlspecialchars($tracking_data['image']); ?>" target="_blank" title="Click to view full high-resolution image" style="width: 100%; display: block;">
+                                    <img src="../uploads/<?php echo htmlspecialchars($tracking_data['image']); ?>" alt="Package Item Photo" class="package-image-preview" onerror="this.onerror=null; this.src='../assets/img/cargo-plane.png';">
+                                </a>
+                                <div class="package-image-caption">
+                                    <i class="fa-solid fa-magnifying-glass-plus" style="color: var(--primary); margin-right: 0.25rem;"></i>
+                                    Click photo to inspect full resolution
+                                </div>
+                            <?php else: ?>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2.5rem 1.5rem; text-align: center;">
+                                    <div style="width: 64px; height: 64px; border-radius: 50%; background-color: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+                                        <i class="fa-solid fa-boxes-stacked"></i>
+                                    </div>
+                                    <strong style="color: var(--secondary); font-size: 1rem;">Standard Consignment Freight</strong>
+                                    <span style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;">
+                                        No item snapshot uploaded
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Right: Detailed Item & Manifest Specifications -->
+                        <div>
+                            <div class="package-specs-grid">
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-box" style="color: var(--primary);"></i> Cargo Description</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['package_discription'] ?: 'Standard Logistics Cargo'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-weight-hanging" style="color: var(--primary);"></i> Total Gross Weight</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['weight'] ?: 'Not recorded'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-cubes" style="color: var(--primary);"></i> Quantity / Pieces</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['quantity'] ?: '1 Package / Item'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-plane-departure" style="color: var(--primary);"></i> Shipment Mode</div>
+                                    <div class="spec-value" style="text-transform: capitalize;"><?php echo htmlspecialchars($tracking_data['shipment_mode'] ?: 'Express Air Freight'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-credit-card" style="color: var(--primary);"></i> Payment Terms / Mode</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['payment_mode'] ?: 'Prepaid'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-barcode" style="color: var(--primary);"></i> Carrier Ref Number</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['carrier_refrence_number'] ?: 'N/A'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-warehouse" style="color: var(--primary);"></i> Origin Dispatch Hub</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['dispatch_location'] ?: 'Origin Terminal'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-solid fa-location-crosshairs" style="color: var(--primary);"></i> Final Destination</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['destination'] ?: 'Destination Hub'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-regular fa-calendar-check" style="color: var(--primary);"></i> Dispatch Date</div>
+                                    <div class="spec-value"><?php echo htmlspecialchars($tracking_data['dispach_date'] ?: 'N/A'); ?></div>
+                                </div>
+
+                                <div class="spec-box">
+                                    <div class="spec-label"><i class="fa-regular fa-clock" style="color: var(--primary);"></i> Expected Delivery</div>
+                                    <div class="spec-value" style="color: var(--primary);">
+                                        <?php echo htmlspecialchars($tracking_data['estimated_delivery_date'] ?: 'In Transit'); ?>
+                                        <?php if (!empty($tracking_data['delivery_time'])): ?>
+                                            <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">(<?php echo htmlspecialchars($tracking_data['delivery_time']); ?>)</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if (!empty($tracking_data['delivery_message']) || !empty($tracking_data['message'])): ?>
+                                <div style="margin-top: 1.25rem; padding: 1rem 1.25rem; background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: var(--radius-md); font-size: 0.9rem; color: #0369a1;">
+                                    <strong style="font-family: var(--font-heading); display: block; margin-bottom: 0.35rem;">
+                                        <i class="fa-solid fa-circle-info" style="margin-right: 0.35rem;"></i> Special Cargo & Delivery Remarks:
+                                    </strong>
+                                    <?php echo nl2br(htmlspecialchars($tracking_data['delivery_message'] ?: $tracking_data['message'])); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 2-Column Details: Route & History -->
-                <div style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 2rem; align-items: start;">
+                <div class="tracking-details-grid">
                     <!-- Left: Map & Addresses -->
                     <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                         <!-- Live Map Embed -->
@@ -370,7 +647,12 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
                                     <i class="fa-solid fa-location-dot" style="color: var(--primary); margin-right: 0.35rem;"></i>
                                     <?php echo htmlspecialchars($tracking_data['sender_address']); ?>
                                 </p>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                    <i class="fa-regular fa-envelope" style="color: var(--primary); margin-right: 0.35rem;"></i>
+                                    Email: <?php echo htmlspecialchars($tracking_data['sender_email'] ?: 'N/A'); ?>
+                                </p>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                                    <i class="fa-solid fa-phone" style="color: var(--primary); margin-right: 0.35rem;"></i>
                                     Contact: <?php echo htmlspecialchars($tracking_data['sender_contact']); ?>
                                 </p>
                             </div>
@@ -385,7 +667,16 @@ if (isset($_POST['search']) || isset($_SESSION['search_P'])) {
                                     <i class="fa-solid fa-location-dot" style="color: #059669; margin-right: 0.35rem;"></i>
                                     <?php echo htmlspecialchars($tracking_data['receiver_address']); ?>
                                 </p>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                    <i class="fa-regular fa-envelope" style="color: #059669; margin-right: 0.35rem;"></i>
+                                    Email: <?php echo htmlspecialchars($tracking_data['receiver_email'] ?: 'N/A'); ?>
+                                </p>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                    <i class="fa-solid fa-phone" style="color: #059669; margin-right: 0.35rem;"></i>
+                                    Contact: <?php echo htmlspecialchars($tracking_data['receiver_contact']); ?>
+                                </p>
                                 <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                                    <i class="fa-solid fa-flag-checkered" style="color: #059669; margin-right: 0.35rem;"></i>
                                     Destination: <strong><?php echo htmlspecialchars($tracking_data['destination']); ?></strong>
                                 </p>
                             </div>

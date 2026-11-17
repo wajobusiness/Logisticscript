@@ -225,6 +225,7 @@ if (isset($_GET['num']) && $_GET['num'] != "") {
                     <p style="font-size: 0.9rem; color: var(--text-body);">
                         Address: <?php echo htmlspecialchars($tracking_data['receiver_address'] ?? ''); ?><br>
                         Destination: <?php echo htmlspecialchars($tracking_data['destination'] ?? ''); ?><br>
+                        Email: <?php echo htmlspecialchars($tracking_data['receiver_email'] ?? 'N/A'); ?><br>
                         Contact: <?php echo htmlspecialchars($tracking_data['receiver_contact'] ?? ''); ?>
                     </p>
                 </div>
@@ -252,8 +253,30 @@ if (isset($_GET['num']) && $_GET['num'] != "") {
                         <td style="color: var(--primary); font-weight: 700;"><?php echo htmlspecialchars($tracking_data['estimated_delivery_date'] ?? 'N/A'); ?></td>
                     </tr>
                     <tr>
-                        <td colspan="6" style="background-color: var(--bg-light); font-size: 0.9rem;">
-                            <strong>Cargo Description:</strong> <?php echo htmlspecialchars($tracking_data['package_discription'] ?? 'Commercial freight parcel'); ?>
+                        <td colspan="6" style="background-color: var(--bg-light); padding: 1.25rem;">
+                            <div style="display: flex; gap: 1.5rem; align-items: center;">
+                                <?php if (!empty($tracking_data['image'])): ?>
+                                    <div style="width: 100px; height: 100px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; background-color: #ffffff;">
+                                        <img src="../uploads/<?php echo htmlspecialchars($tracking_data['image']); ?>" alt="Package Item" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                <?php endif; ?>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 1rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.35rem;">
+                                        Cargo: <?php echo htmlspecialchars($tracking_data['package_discription'] ?? 'Commercial freight parcel'); ?>
+                                    </div>
+                                    <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+                                        Payment Mode: <strong><?php echo htmlspecialchars($tracking_data['payment_mode'] ?? 'Prepaid'); ?></strong> &bull; 
+                                        Carrier Ref: <strong><?php echo htmlspecialchars($tracking_data['carrier_refrence_number'] ?? 'N/A'); ?></strong><br>
+                                        Origin Location: <strong><?php echo htmlspecialchars($tracking_data['dispatch_location'] ?? 'N/A'); ?></strong> &bull; 
+                                        Final Destination: <strong><?php echo htmlspecialchars($tracking_data['destination'] ?? 'N/A'); ?></strong>
+                                    </div>
+                                    <?php if (!empty($tracking_data['delivery_message']) || !empty($tracking_data['message'])): ?>
+                                        <div style="margin-top: 0.35rem; font-size: 0.82rem; color: var(--primary);">
+                                            <strong>Special Handling:</strong> <?php echo htmlspecialchars($tracking_data['delivery_message'] ?: $tracking_data['message']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

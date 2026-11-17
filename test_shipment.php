@@ -266,12 +266,15 @@ Est. Delivery:   <?php echo $verified_shipment['estimated_delivery_date'] . "\n"
                 </div>
             </div>
 
-            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a href="track/print.php?num=<?php echo urlencode($new_tracking_id); ?>" target="_blank" class="block text-center py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm transition-all shadow-lg hover:shadow-sky-500/30">
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <a href="track/tracking.php?tracking_id=<?php echo urlencode($new_tracking_id); ?>" target="_blank" class="block text-center py-2.5 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs sm:text-sm transition-all shadow-lg hover:shadow-sky-500/30">
+                    Live Tracking Page
+                </a>
+                <a href="track/print.php?num=<?php echo urlencode($new_tracking_id); ?>" target="_blank" class="block text-center py-2.5 px-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-xs sm:text-sm border border-gray-700 transition-all">
                     View & Print Invoice
                 </a>
-                <a href="admin/view-details.php?detail=<?php echo urlencode($new_tracking_id); ?>" target="_blank" class="block text-center py-2.5 px-4 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-sm border border-gray-700 transition-all">
-                    View in Admin Panel
+                <a href="admin/view-details.php?detail=<?php echo urlencode($new_tracking_id); ?>" target="_blank" class="block text-center py-2.5 px-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold text-xs sm:text-sm border border-gray-700 transition-all">
+                    Admin Panel
                 </a>
             </div>
         <?php endif; ?>
