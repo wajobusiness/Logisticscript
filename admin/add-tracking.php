@@ -53,6 +53,14 @@ if (isset($_POST['add'])) {
         $error = "Please fill in all required fields (Sender Name, Receiver Name, Description).";
     }
 
+    // Defensive date handling for MySQL strict mode
+    if (empty($dispach_date)) {
+        $dispach_date = date('Y-m-d');
+    }
+    if (empty($estimated_delivery_date)) {
+        $estimated_delivery_date = date('Y-m-d', strtotime('+5 days'));
+    }
+
     // Image Upload (Max 5MB)
     $packageImage = '';
     $maxFileSize = 5 * 1024 * 1024; // 5MB in bytes (5,242,880 bytes)
@@ -69,17 +77,64 @@ if (isset($_POST['add'])) {
             $error = "Image upload failed with error code: " . $fileError . ". Please try another image.";
         } else {
             $extensions = array("jpeg", "jpg", "png", "webp");
-            $location = "../uploads/";
             $filename = $_FILES["image"]["name"];
             $file_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
             if (in_array($file_ext, $extensions)) {
-                if (!is_dir($location)) {
-                    mkdir($location, 0755, true);
+                // Determine absolute filesystem path to project's uploads folder
+                $targetDir = realpath(__DIR__ . '/../uploads');
+                if ($targetDir === false || !is_dir($targetDir)) {
+                    $targetDir = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads';
                 }
+                $targetDir = rtrim($targetDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+                // Ensure directory exists with writable permissions
+                if (!is_dir($targetDir)) {
+                    @mkdir($targetDir, 0777, true);
+                }
+                @chmod($targetDir, 0777);
+
                 $packageImage = $tnumbs . '.' . $file_ext;
-                if (!move_uploaded_file($_FILES["image"]["tmp_name"], $location . $packageImage)) {
-                    $error = "Failed to upload image. Please check upload folder permissions.";
+                $destination = $targetDir . $packageImage;
+                $uploaded = false;
+
+                // Strategy 1: Standard move_uploaded_file to absolute target directory
+                if (is_uploaded_file($_FILES["image"]["tmp_name"]) && @move_uploaded_file($_FILES["image"]["tmp_name"], $destination)) {
+                    $uploaded = true;
+                    @chmod($destination, 0644);
+                }
+                // Strategy 2: copy() fallback in case move_uploaded_file is restricted
+                elseif (@copy($_FILES["image"]["tmp_name"], $destination)) {
+                    $uploaded = true;
+                    @chmod($destination, 0644);
+                    @unlink($_FILES["image"]["tmp_name"]);
+                }
+                // Strategy 3: file_put_contents + file_get_contents fallback
+                elseif (is_readable($_FILES["image"]["tmp_name"]) && ($imgData = @file_get_contents($_FILES["image"]["tmp_name"])) !== false) {
+                    if (@file_put_contents($destination, $imgData) !== false) {
+                        $uploaded = true;
+                        @chmod($destination, 0644);
+                        @unlink($_FILES["image"]["tmp_name"]);
+                    }
+                }
+                // Strategy 4: Relative path ../uploads/ fallback
+                if (!$uploaded) {
+                    $relDir = '../uploads/';
+                    if (!is_dir($relDir)) {
+                        @mkdir($relDir, 0777, true);
+                    }
+                    @chmod($relDir, 0777);
+                    $relDest = $relDir . $packageImage;
+                    if (@move_uploaded_file($_FILES["image"]["tmp_name"], $relDest) || @copy($_FILES["image"]["tmp_name"], $relDest)) {
+                        $uploaded = true;
+                        @chmod($relDest, 0644);
+                    }
+                }
+
+                if (!$uploaded) {
+                    $lastErr = error_get_last();
+                    $errDetail = isset($lastErr['message']) ? " (" . $lastErr['message'] . ")" : "";
+                    $error = "Failed to upload image to '" . htmlspecialchars($targetDir) . "'. Please check folder permissions (run 'chmod -R 777 uploads' on cPanel)." . $errDetail;
                 }
             } else {
                 $error = "Invalid file type. Supported formats are JPG, JPEG, PNG, and WEBP.";
@@ -98,7 +153,7 @@ if (isset($_POST['add'])) {
             // Send mail notification
             // Ensure you have a working sendMail function and site settings in the DB
             $settings_sql = mysqli_query($con, "SELECT site_url, sitename FROM setting LIMIT 1");
-            $settings = mysqli_fetch_assoc($settings_sql);
+            $settings = $settings_sql ? mysqli_fetch_assoc($settings_sql) : null;
             $site_url = $settings['site_url'] ?? 'http://yourwebsite.com';
             $sitename = $settings['sitename'] ?? 'Universal Union Logistics';
             
@@ -108,14 +163,15 @@ if (isset($_POST['add'])) {
                      <p><strong>Tracking Number:</strong> " . htmlspecialchars($tnumbs) . "</p>
                      <p><strong>Status:</strong> " . htmlspecialchars($status) . "</p>
                      <p>For more information, please visit our <a href='" . $site_url . "/track.html'>Tracking Page</a>.</p>";
-            sendMail($receiver_email, $subject, $body);
+            @sendMail($receiver_email, $subject, $body);
 
             $msg = "Shipment created successfully! Tracking Number: " . $tnumbs;
             // Clear variables for a new entry
             $_POST = array(); 
             
         } else {
-            $error = "Database error: Failed to create shipment.";
+            $dbErr = $stmt->error ?: ($con->error ?: 'Unknown database error');
+            $error = "Database error: Failed to create shipment. " . htmlspecialchars($dbErr);
         }
         $stmt->close();
     }
